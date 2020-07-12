@@ -5,7 +5,14 @@
  */
 package ec.ups.edu.vista;
 
+import static java.awt.image.ImageObserver.HEIGHT;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -14,13 +21,15 @@ import javax.swing.JFileChooser;
 public class VentanaPrincipal extends javax.swing.JFrame {
 
     JFileChooser ventanaArchivos;
+
     /**
      * Creates new form VentanaPrincipal
      */
     public VentanaPrincipal() {
         initComponents();
-        
+
         ventanaArchivos = new JFileChooser();
+        ventanaArchivos.setDialogTitle("Seleccione el directorio en el que decea guardar el archivo");
     }
 
     /**
@@ -52,6 +61,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jLabelEncriptacion.setText("Encriptacion de un archivo de texto");
 
         jButtonLimpiar.setText("Limpiar");
+        jButtonLimpiar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonLimpiarActionPerformed(evt);
+            }
+        });
 
         jButtonEncriptar.setText("Encriptar");
         jButtonEncriptar.addActionListener(new java.awt.event.ActionListener() {
@@ -65,17 +79,18 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabelEncriptacion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabelEncriptacion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(119, 119, 119)
+                        .addComponent(jButtonLimpiar)
+                        .addGap(121, 121, 121)
+                        .addComponent(jButtonEncriptar)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(121, 121, 121)
-                .addComponent(jButtonLimpiar)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButtonEncriptar)
-                .addGap(121, 121, 121))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -84,7 +99,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 .addComponent(jLabelEncriptacion, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(17, 17, 17)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonLimpiar)
                     .addComponent(jButtonEncriptar))
@@ -99,7 +114,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -107,11 +122,55 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonEncriptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncriptarActionPerformed
+        String texto = jTextAreaTextoIngresado.getText();
 
-        
-        jTextAreaTextoIngresado.setText(encriptar(jTextAreaTextoIngresado.getText()));
-        ventanaArchivos.showOpenDialog(this);
+        //Obtenemos la ruta en la cual el usuario decea guardar el archivo si el textArea no esta vacio
+        if (!texto.equals("")) {
+            String rutaSeleccionada = seleccionarRuta();
+
+            //Si el usuario selecciono una ruta
+            if (rutaSeleccionada != null) {
+
+                //Obtenemos el nombre del archivo ingresado por el usuario
+                String nombre = JOptionPane.showInputDialog(this, "Ingrese el nombre con el que decea guardar el archivo", "Archivo de Texto", HEIGHT);
+
+                //Si el usuario presiono el boton aceptar
+                if (nombre != null) {
+
+                    //Si el usuario ingreso un nombre
+                    if (!nombre.equals("")) {
+
+                        //Validamos que tengo la extencion .txt
+                        if (nombre.length() > 4) {
+                            if (!nombre.substring(nombre.length() - 5).equals(".txt")) {
+                                nombre += ".txt";
+
+                            }
+                        } else {
+                            nombre += ".txt";
+
+                        }
+
+                        //Guardamos el archivo
+                        guardarEnTexto(rutaSeleccionada + "/" + nombre, encriptar(texto));
+                        jTextAreaTextoIngresado.setText("");
+
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Debe ingresar un nombre");
+
+                    }
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Porfavor ingrese el texto que decea encriptar");
+
+        }
     }//GEN-LAST:event_jButtonEncriptarActionPerformed
+
+    private void jButtonLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLimpiarActionPerformed
+
+        jTextAreaTextoIngresado.setText("");
+    }//GEN-LAST:event_jButtonLimpiarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -147,19 +206,60 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
         });
     }
-    
+
     public String encriptar(String texto) {
         char caracteres[] = texto.toCharArray();
-        
+
         for (int i = 0; i < caracteres.length; i++) {
-            char carcterDesplazado = (char)(caracteres[i] + (char)3);
-            caracteres[i] = carcterDesplazado ;
-            
+            char carcterDesplazado = (char) (caracteres[i] + (char) 3);
+            caracteres[i] = carcterDesplazado;
+
         }
         return String.valueOf(caracteres);
     }
-    
-    
+
+    public void guardarEnTexto(String ruta, String texto) {
+        try {
+            FileWriter archivoEscritura = new FileWriter(ruta, true);
+
+            BufferedWriter escritura = new BufferedWriter(archivoEscritura);
+
+            escritura.append(texto);
+            escritura.close();
+            archivoEscritura.close();
+            JOptionPane.showMessageDialog(this, "Archivo guardado en: " + ruta);
+
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "ruta del arcgivo no encontrada");
+
+        } catch (IOException e2) {
+            JOptionPane.showMessageDialog(this, "Error de escritura");
+
+        } catch (Exception e3) {
+            JOptionPane.showMessageDialog(this, "Ha ocurrido un error al guardar el archivo intentelo de nuevo");
+
+        }
+    }
+
+    public String seleccionarRuta() {
+        //Creamos el filtro
+        ventanaArchivos.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        //Abrimos la ventana y guardamos la opcion seleccionada
+        int seleccion = ventanaArchivos.showOpenDialog(this);
+
+        //Si el usuario selecciona aceptar
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+
+            //Obtenemos el fichero seleccionado
+            File fichero = ventanaArchivos.getSelectedFile();
+
+            //Escribimos la ruta seleccionada en el jTextlabel
+            return fichero.getAbsolutePath();
+
+        }
+        return null;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonEncriptar;
