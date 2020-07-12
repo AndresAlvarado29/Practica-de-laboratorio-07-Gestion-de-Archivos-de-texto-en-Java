@@ -142,7 +142,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
                         //Validamos que tengo la extencion .txt
                         if (nombre.length() > 4) {
-                            if (!nombre.substring(nombre.length() - 5).equals(".txt")) {
+                            if (!nombre.substring(nombre.length() - 4).equals(".txt")) {
                                 nombre += ".txt";
 
                             }
